@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 from . import commonUtil
+from . import models
 
 #랭크 정보 조회
 def getLolRank(userId, userType):

@@ -39,9 +39,14 @@ class LUser(models.Model):
     reg_date = models.DateTimeField(db_column='REG_DATE', blank=True, null=True)  # Field name made lowercase.
     upd_date = models.DateTimeField(db_column='UPD_DATE', blank=True, null=True)  # Field name made lowercase.
 
+    @property
+    def test(self):
+        return 'test'
+    
     class Meta:
         managed = False
         db_table = 'l_user'
+
 
 
 class LUserMatch(models.Model):
