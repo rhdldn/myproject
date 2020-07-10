@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from django.template import loader
 from . import lolStsService
 from . import lolAddStsService
-from . import lolAddStsService
 from . import models
 
 def userList(request):
@@ -27,7 +26,7 @@ def ponyList(request):
 
     resultVal = lolStsService.getLolRank("", "PONY")
 
-    print(resultVal)
+    #print(resultVal)
     context = {
         'resultVal': resultVal,
     }

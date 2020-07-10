@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+import datetime
 
 
 class LApikey(models.Model):
@@ -38,10 +39,6 @@ class LUser(models.Model):
     puuid = models.CharField(db_column='PUUID', max_length=100, blank=True, null=True)  # Field name made lowercase.
     reg_date = models.DateTimeField(db_column='REG_DATE', blank=True, null=True)  # Field name made lowercase.
     upd_date = models.DateTimeField(db_column='UPD_DATE', blank=True, null=True)  # Field name made lowercase.
-
-    @property
-    def test(self):
-        return 'test'
     
     class Meta:
         managed = False
@@ -52,7 +49,8 @@ class LUser(models.Model):
 class LUserMatch(models.Model):
     user_game_id = models.CharField(db_column='USER_GAME_ID', primary_key=True, max_length=50)  # Field name made lowercase.
     game_match_id = models.CharField(db_column='GAME_MATCH_ID', max_length=50)  # Field name made lowercase.
-    champion_id = models.IntegerField(db_column='CHAMPION_ID', blank=True, null=True)  # Field name made lowercase.
+    #champion_id = models.IntegerField(db_column='CHAMPION_ID', blank=True, null=True)  # Field name made lowercase.
+    champion_id = models.ForeignKey(LChampion, db_column='CHAMPION_ID', on_delete=models.CASCADE)  # Field name made lowercase.    
     que_type = models.IntegerField(db_column='QUE_TYPE', blank=True, null=True)  # Field name made lowercase.
     season = models.IntegerField(db_column='SEASON', blank=True, null=True)  # Field name made lowercase.
     game_date = models.DateTimeField(db_column='GAME_DATE', blank=True, null=True)  # Field name made lowercase.
@@ -64,6 +62,31 @@ class LUserMatch(models.Model):
     deaths = models.IntegerField(db_column='DEATHS', blank=True, null=True)  # Field name made lowercase.
     assists = models.IntegerField(db_column='ASSISTS', blank=True, null=True)  # Field name made lowercase.
     win_flag = models.CharField(db_column='WIN_FLAG', max_length=10, blank=True, null=True)  # Field name made lowercase.
+
+    @property
+    def position_img(self):
+        
+        if self.game_role == "DUO_SUPPORT":
+            game_role_conv = "support"
+        else:
+            game_role_conv = self.game_role
+
+        if self.lane == "BOTTOM":
+            lane_conv = "ad"
+        elif self.lane == "TOP":
+            lane_conv = "top"
+        elif self.lane == "JUNGLE":
+            lane_conv = "jg"
+        elif self.lane == "MID":
+            lane_conv = "mid"
+        else:
+            lane_conv = ""
+
+        if game_role_conv == "support":
+            position_img_conv = game_role_conv
+        else:
+            position_img_conv = lane_conv
+        return position_img_conv
 
     class Meta:
         managed = False
@@ -81,6 +104,34 @@ class LUserRank(models.Model):
     losses_cnt = models.IntegerField(db_column='LOSSES_CNT', blank=True, null=True)  # Field name made lowercase.
     reg_date = models.DateTimeField(db_column='REG_DATE', blank=True, null=True)  # Field name made lowercase.
     upd_date = models.DateTimeField(db_column='UPD_DATE', blank=True, null=True)  # Field name made lowercase.
+
+    @property
+    def tier_img(self):
+        return self.tier.lower()
+
+    @property
+    def diff_min(self):
+        upd_date_conv = self.upd_date.strftime('%Y-%m-%d %H:%M:%S')
+        curr_now = datetime.datetime.now()
+        now_conv = curr_now.strftime('%Y-%m-%d %H:%M:%S')
+        diff_day_conv = datetime.datetime.strptime(now_conv, "%Y-%m-%d %H:%M:%S") - datetime.datetime.strptime(upd_date_conv, "%Y-%m-%d %H:%M:%S")        
+        return int(diff_day_conv.seconds / 60)
+
+    @property
+    def diff_hour(self):
+        upd_date_conv = self.upd_date.strftime('%Y-%m-%d %H:%M:%S')
+        curr_now = datetime.datetime.now()
+        now_conv = curr_now.strftime('%Y-%m-%d %H:%M:%S')
+        diff_day_conv = datetime.datetime.strptime(now_conv, "%Y-%m-%d %H:%M:%S") - datetime.datetime.strptime(upd_date_conv, "%Y-%m-%d %H:%M:%S")
+        return int(diff_day_conv.seconds / 60 / 60)
+
+    @property
+    def diff_day(self):
+        upd_date_conv = self.upd_date.strftime('%Y-%m-%d %H:%M:%S')
+        curr_now = datetime.datetime.now()
+        now_conv = curr_now.strftime('%Y-%m-%d %H:%M:%S')
+        diff_day_conv = datetime.datetime.strptime(now_conv, "%Y-%m-%d %H:%M:%S") - datetime.datetime.strptime(upd_date_conv, "%Y-%m-%d %H:%M:%S")
+        return int(diff_day_conv.days)
 
     class Meta:
         managed = False
