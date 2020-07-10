@@ -1,14 +1,16 @@
 import requests
+import datetime
+from . import models
 from . import commonUtil
 from . import lolMatchService
 
 #랭크 정보 조회
-def getRankInfo(userId, userList, apiKey):
+def getRankInfo(userId, userModel, apiKey):
     print("랭크 정보 조회")
 
-    for userInfo in userList:
-        eucId = userInfo['EUC_ID']
-        accountId = userInfo['ACCOUNT_ID']
+    for userInfo in userModel:
+        eucId = userInfo.euc_id
+        accountId = userInfo.account_id
 
     getLolUserRank(userId, eucId, accountId, apiKey)
 
@@ -27,17 +29,17 @@ def getLolUserRank(userId, eucId, accountId, apiKey):
 def parsingRankInfo(rankList):
     print("랭크 정보 파싱")
 
-    for rankInfo in rankList:
-        
-        sql = " INSERT INTO L_USER_RANK (USER_GAME_ID, QUE_TYPE, TIER, RANK_LVL, LEAGUE_PT, WINS_CNT, LOSSES_CNT, REG_DATE, UPD_DATE) "
-        sql += " VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW()) "
-        sql += " ON DUPLICATE KEY "
-        sql += " UPDATE "
-        sql += " TIER = %s "
-        sql += " , RANK_LVL = %s "
-        sql += " , LEAGUE_PT = %s "
-        sql += " , WINS_CNT = %s "
-        sql += " , LOSSES_CNT = %s "
-        sql += " , UPD_DATE = NOW() "
-        commonUtil.curs.execute(sql, (rankInfo['summonerName'], rankInfo['queueType'], rankInfo['tier'], rankInfo['rank'], rankInfo['leaguePoints'], rankInfo['wins'], rankInfo['losses'], rankInfo['tier'], rankInfo['rank'], rankInfo['leaguePoints'], rankInfo['wins'], rankInfo['losses']))
-        commonUtil.conn.commit()
+    for rankInfo in rankList:        
+        try:
+            rankModel = models.LUserRank.objects.get(user_game_id=rankInfo['summonerName'], que_type=rankInfo['queueType'])
+            rankModel.tier = rankInfo['tier']
+            rankModel.rank_lvl = rankInfo['rank']
+            rankModel.league_pt = rankInfo['leaguePoints']
+            rankModel.wins_cnt = rankInfo['wins']
+            rankModel.losses_cnt = rankInfo['losses']
+            rankModel.upd_date = datetime.datetime.now()
+            rankModel.save()
+
+        except models.LUser.DoesNotExist:
+            rankModel = models.LUserRank(user_game_id=rankInfo['summonerName'], que_type=userJson['queueType'], tier=userJson['tier'], rank_lvl=userJson['rank'], league_pt=userJson['leaguePoints'], wins_cnt=userJson['wins'], losses_cnt=userJson['losses'], reg_date=datetime.datetime.now(), upd_date=datetime.datetime.now())
+            rankModel.save()

@@ -1,6 +1,8 @@
 import requests
 import json
+import datetime
 import pandas as pd
+from . import models
 from . import commonUtil
 from . import lolRankService
 
@@ -8,14 +10,11 @@ from . import lolRankService
 def createUserHs(userId):
     
     ##API KEY DB 조회
-    sql = " SELECT API_KEY "
-    sql += " FROM L_APIKEY "
-    commonUtil.curs.execute(sql)
-    rows = commonUtil.curs.fetchall()
-    print(pd.DataFrame(rows))
+    apiKeyModel = models.LApikey.objects.all()
 
-    for row in rows:
-        apiKey = row['API_KEY']
+    for apiKeyInfo in apiKeyModel:
+        apiKey = apiKeyInfo.api_key
+        print(apiKey)
     
     ##유저 정보 조회 API
     r = requests.get(commonUtil.apiUrl + "lol/summoner/v4/summoners/by-name/"+ userId +"?api_key="+ apiKey)
@@ -24,34 +23,23 @@ def createUserHs(userId):
     userJson['userId'] = userId
     userJson['userType'] = ""
     
-    sql = " INSERT INTO L_USER (USER_GAME_ID, USER_TYPE, GAME_LVL, EUC_ID, ACCOUNT_ID, PUUID, REG_DATE, UPD_DATE) "
-    sql += " VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW()) "
-    sql += " ON DUPLICATE KEY "
-    sql += " UPDATE "
-    sql += " GAME_LVL = %s "
-    sql += " , EUC_ID = %s "
-    sql += " , ACCOUNT_ID = %s "
-    sql += " , PUUID = %s "
-    sql += " , UPD_DATE = NOW() "
-    commonUtil.curs.execute(sql, (userJson['userId'], userJson['userType'], userJson['summonerLevel'], userJson['id'], userJson['accountId'], userJson['puuid'], userJson['summonerLevel'], userJson['id'], userJson['accountId'], userJson['puuid']))
-    commonUtil.conn.commit()
+    #유저 정보 갱신
+    try:
+        userModel = models.LUser.objects.get(user_game_id=userId)
+        userModel.game_lvl = userJson['summonerLevel']
+        userModel.euc_id = userJson['id']
+        userModel.account_id = userJson['accountId']
+        userModel.puuid = userJson['puuid']
+        userModel.upd_date = datetime.datetime.now()
+        userModel.save()
 
-    sql = " SELECT USER_GAME_ID "
-    sql += " , USER_TYPE "
-    sql += " , GAME_LVL "
-    sql += " , EUC_ID "
-    sql += " , ACCOUNT_ID "
-    sql += " , PUUID "
-    sql += " , REG_DATE "
-    sql += " , UPD_DATE "
-    sql += " FROM L_USER "
-    sql += " WHERE 1=1 "
+    except models.LUser.DoesNotExist:
+        userModel = models.LUser(user_game_id=userId, user_type=userJson['userType'], game_lvl=userJson['summonerLevel'], euc_id=userJson['id'], account_id=userJson['accountId'], puuid=userJson['puuid'], reg_date=datetime.datetime.now(), upd_date=datetime.datetime.now())
+        userModel.save()
 
     if userId != None :
-        sql += " AND USER_GAME_ID = %s "
-        commonUtil.curs.execute(sql, userId)
+        userModel = models.LUser.objects.filter(user_game_id=userId)
+    else :
+        print("유저 정보 없음")
 
-    userList = commonUtil.curs.fetchall()
-    print(pd.DataFrame(userList))
-
-    lolRankService.getRankInfo(userId, userList, apiKey)
+    lolRankService.getRankInfo(userId, userModel, apiKey)

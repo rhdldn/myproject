@@ -7,4 +7,5 @@ urlpatterns = [
     path('userlist', views.userList, name='userlist'),
     path('ponylist', views.ponyList, name='ponylist'),
     path('enemylist', views.enemyList, name='enemylist'),
+    path('updkey/<str:apiKey>', views.updKey, name='updKey'),
 ]

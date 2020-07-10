@@ -1,14 +1,11 @@
 from . import commonUtil
+from . import models
 
 def modifyApiKey(apiKey):
-    
+        
     if apiKey != None and apiKey != '':
 
-        sql = " UPDATE L_APIKEY "
-        sql += " SET API_KEY = %s "
-        sql += " , REG_DATE = NOW() "
-        commonUtil.curs.execute(sql, apiKey)
-        commonUtil.conn.commit() 
-
+        apiKeyModel = models.LApikey.objects.all()
+        apiKeyModel.update(api_key=apiKey)
         print("APIKEY 갱신 성공")
 

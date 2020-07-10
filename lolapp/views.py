@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.template import loader
 from . import lolStsService
 from . import lolAddStsService
+from . import lolApiKeyService
 from . import models
 
 def userList(request):
@@ -38,5 +39,15 @@ def enemyList(request):
     resultVal = lolStsService.getLolRank("", "ENERMY")
     context = {
         'resultVal': resultVal,
+    }
+    return HttpResponse(template.render(context, request))
+
+def updKey(request, apiKey):
+    template = loader.get_template('lolapp/userlist.html')
+
+    lolApiKeyService.modifyApiKey(apiKey)
+
+    context = {
+        'resultVal': "갱신되었습니다.",
     }
     return HttpResponse(template.render(context, request))
