@@ -17,8 +17,10 @@ def userDtlList(request, userId):
 
     lolAddStsService.createUserHs(userId)
 
+    resultVal = lolStsService.getLolRank(userId, "")
+
     context = {
-        'dd': "Hello",
+        'resultVal': resultVal,
     }
     return HttpResponse(template.render(context, request))
 
@@ -33,10 +35,35 @@ def ponyList(request):
     }
     return HttpResponse(template.render(context, request))
 
+def ponyStsUpdList(request, userId):
+    template = loader.get_template('lolapp/ponylist.html')
+
+    lolAddStsService.createUserHs(userId)
+
+    resultVal = lolStsService.getLolRank("", "PONY")
+
+    #print(resultVal)
+    context = {
+        'resultVal': resultVal,
+    }
+    return HttpResponse(template.render(context, request))
+
 def enemyList(request):
     template = loader.get_template('lolapp/enemylist.html')
+    
+    resultVal = lolStsService.getLolRank("", "ENERMY")
+    context = {
+        'resultVal': resultVal,
+    }
+    return HttpResponse(template.render(context, request))
+
+def enemyStsUpdList(request, userId):
+    template = loader.get_template('lolapp/enemylist.html')
+    
+    lolAddStsService.createUserHs(userId)
 
     resultVal = lolStsService.getLolRank("", "ENERMY")
+
     context = {
         'resultVal': resultVal,
     }

@@ -25,7 +25,16 @@ def parsingMatchInfo(matchJson, userId, accountId, apiKey):
     for matchInfo in matchList: 
         conv_game_time = make_aware(datetime.datetime.fromtimestamp(matchInfo['timestamp']/1000))
         conv_game_time = datetime.datetime.strftime(conv_game_time, "%Y-%m-%d %H:%M:%S")
-        models.LUserMatch.objects.filter(user_game_id=userId, game_match_id=matchInfo['gameId']).update(champion_id=matchInfo['champion'], que_type=matchInfo['queue'], season=matchInfo['season'], game_date=conv_game_time, game_role=matchInfo['role'], lane=matchInfo['lane'], upd_date=datetime.datetime.now())
+
+        try:
+            championModel = models.LChampion.objects.get(champion_id=matchInfo['champion'])
+            matchExInfo = models.LUserMatch.objects.get(user_game_id=userId, game_match_id=matchInfo['gameId'])
+
+            models.LUserMatch.objects.filter(user_game_id=userId, game_match_id=matchInfo['gameId']).update(champion_id=championModel, que_type=matchInfo['queue'], season=matchInfo['season'], game_date=conv_game_time, game_role=matchInfo['role'], lane=matchInfo['lane'], upd_date=datetime.datetime.now())
+
+        except models.LUserMatch.DoesNotExist:
+            matchModel = models.LUserMatch.objects.create(user_game_id=userId, game_match_id=matchInfo['gameId'], champion_id=championModel, que_type=matchInfo['queue'], season=matchInfo['season'], game_date=conv_game_time, game_role=matchInfo['role'], lane=matchInfo['lane'], reg_date=datetime.datetime.now(), upd_date=datetime.datetime.now())
+
         parsingMatchDetail(userId, accountId, matchInfo['gameId'], apiKey)     
 
 #매치 상세 정보 파싱

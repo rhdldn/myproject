@@ -29,5 +29,10 @@ def getLolUserRank(userId, eucId, accountId, apiKey):
 def parsingRankInfo(rankList):
     print("랭크 정보 파싱")
 
-    for rankInfo in rankList:
-        models.LUserRank.objects.filter(user_game_id=rankInfo['summonerName'], que_type=rankInfo['queueType']).update(tier=rankInfo['tier'], rank_lvl=rankInfo['rank'], league_pt=rankInfo['leaguePoints'], wins_cnt=rankInfo['wins'], losses_cnt=rankInfo['losses'], upd_date=datetime.datetime.now())
+    for rankInfo in rankList:        
+        try:
+            rankExInfo = models.LUserRank.objects.get(user_game_id=rankInfo['summonerName'], que_type=rankInfo['queueType'])
+            models.LUserRank.objects.filter(user_game_id=rankInfo['summonerName'], que_type=rankInfo['queueType']).update(tier=rankInfo['tier'], rank_lvl=rankInfo['rank'], league_pt=rankInfo['leaguePoints'], wins_cnt=rankInfo['wins'], losses_cnt=rankInfo['losses'], upd_date=datetime.datetime.now())
+
+        except models.LUserRank.DoesNotExist:
+            rankModel = models.LUserRank.objects.create(user_game_id=rankInfo['summonerName'], que_type=rankInfo['queueType'], tier=rankInfo['tier'], rank_lvl=rankInfo['rank'], league_pt=rankInfo['leaguePoints'], wins_cnt=rankInfo['wins'], losses_cnt=rankInfo['losses'], reg_date=datetime.datetime.now(), upd_date=datetime.datetime.now())

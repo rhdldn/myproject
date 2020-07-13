@@ -121,11 +121,11 @@
                 	<div style="width:25%; float:left;">
                     <img class="card-img-top" src="https://ddragon.leagueoflegends.com/cdn/10.6.1/img/champion/{{matchList.champion_id.champion_eng_name}}.png" alt="">
                     {% if matchList.win_flag == 'Y' %}
-		                	<img class="card-img-top" style="background-color: #007bff26;" src="/static/img/{{matchList.posion_img}}.png" alt="">
+		                	<img class="card-img-top" style="background-color: #007bff26;" src="/static/img/{{matchList.position_img}}.png" alt="">
 		                	<div style="font-weight: 800; font-size:12px; background-color: #007bff26; text-align: center;">{{matchList.kills}}/{{matchList.deaths}}/{{matchList.assists}}</div>
                     {% endif %}
                     {% if matchList.win_flag == 'N' %}
-		                	<img class="card-img-top" style="background-color: #ff000012;" src="/static/img/{{matchList.posion_img}}.png" alt="">
+		                	<img class="card-img-top" style="background-color: #ff000012;" src="/static/img/{{matchList.position_img}}.png" alt="">
 		                	<div style="font-weight: 800; font-size:12px; background-color: #ff000012; text-align: center;">{{matchList.kills}}/{{matchList.deaths}}/{{matchList.assists}}</div>
                     {% endif %}
         	        </div>
@@ -190,7 +190,7 @@
 	}
 	
 	function stsUpdClick(userId){
-		location.href = "/lolapi/getUserHs.do?userId="+ userId + "&userType=PONY";
+		location.href = "/lolapi/ponylist/"+ userId;
 	}
 	
 </script>

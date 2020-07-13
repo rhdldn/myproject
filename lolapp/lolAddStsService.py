@@ -37,9 +37,11 @@ def createUserHs(userId):
         userModel = models.LUser(user_game_id=userId, user_type=userJson['userType'], game_lvl=userJson['summonerLevel'], euc_id=userJson['id'], account_id=userJson['accountId'], puuid=userJson['puuid'], reg_date=datetime.datetime.now(), upd_date=datetime.datetime.now())
         userModel.save()
 
-    if userId != None :
-        userModel = models.LUser.objects.filter(user_game_id=userId)
-    else :
-        print("유저 정보 없음")
+    userModel = models.LUser.objects.filter(user_game_id=userId)
+
+    # if userId != None :
+    #     userModel = models.LUser.objects.filter(user_game_id=userId)
+    # else :
+    #     print("유저 정보 없음")
 
     lolRankService.getRankInfo(userId, userModel, apiKey)

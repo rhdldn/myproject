@@ -17,9 +17,9 @@ def getLolRank(userId, userType):
         selFlag_2 = True
 
     if selFlag_1 and selFlag_2:
-        userModel = models.LUser.objects.filter(user_id=userId, user_type=userType)
+        userModel = models.LUser.objects.filter(user_game_id=userId, user_type=userType)
     elif selFlag_1:
-        userModel = models.LUser.objects.filter(user_id=userId)
+        userModel = models.LUser.objects.filter(user_game_id=userId)
     elif selFlag_2:
         userModel = models.LUser.objects.filter(user_type=userType)
     else:
@@ -32,6 +32,9 @@ def getLolRank(userId, userType):
 
         retJson = {}
         userId = userInfo.user_game_id
+        soloRankInfo = ""
+        freeRankInfo = ""
+        lastGameModel = ""
 
         #솔로 랭크 정보 조회
         soloRankModel = models.LUserRank.objects.filter(que_type="RANKED_SOLO_5x5", user_game_id=userId)    
