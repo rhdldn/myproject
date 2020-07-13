@@ -1,6 +1,9 @@
 import requests
 import json
+import datetime
+from django.utils.timezone import make_aware
 from . import commonUtil
+from . import models
 
 #매치 정보 조회
 def getLstMatchInfo(rankList, userId, accountId, apiKey):        
@@ -12,7 +15,6 @@ def getLstMatchInfo(rankList, userId, accountId, apiKey):
     matchJson = r.json()
 
     #print(matchJson)
-
     parsingMatchInfo(matchJson, userId, accountId, apiKey)
 
 #매치 정보 파싱
@@ -20,24 +22,10 @@ def parsingMatchInfo(matchJson, userId, accountId, apiKey):
     print("매치 정보 파싱")
 
     matchList = matchJson['matches']
-    for matchInfo in matchList:
-
-        print(matchInfo)
-
-        sql = " INSERT INTO L_USER_MATCH (USER_GAME_ID, GAME_MATCH_ID, CHAMPION_ID, QUE_TYPE, SEASON, GAME_DATE, GAME_ROLE, LANE, REG_DATE, UPD_DATE) "
-        sql += " VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s/1000, '%%Y-%%c-%%d %%H:%%i:%%s'), %s, %s, NOW(), NOW()) "
-        sql += " ON DUPLICATE KEY "
-        sql += " UPDATE "
-        sql += " CHAMPION_ID = %s "
-        sql += " , QUE_TYPE = %s "
-        sql += " , SEASON = %s "
-        sql += " , GAME_DATE = FROM_UNIXTIME(%s/1000,  '%%Y-%%c-%%d %%H:%%i:%%s')"
-        sql += " , GAME_ROLE = %s "
-        sql += " , LANE = %s "
-        sql += " , UPD_DATE = NOW() "
-        commonUtil.curs.execute(sql, (userId, matchInfo['gameId'], matchInfo['champion'], matchInfo['queue'], matchInfo['season'], matchInfo['timestamp'], matchInfo['role'], matchInfo['lane'], matchInfo['champion'], matchInfo['queue'], matchInfo['season'], matchInfo['timestamp'], matchInfo['role'], matchInfo['lane']))
-        commonUtil.conn.commit() 
-
+    for matchInfo in matchList: 
+        conv_game_time = make_aware(datetime.datetime.fromtimestamp(matchInfo['timestamp']/1000))
+        conv_game_time = datetime.datetime.strftime(conv_game_time, "%Y-%m-%d %H:%M:%S")
+        models.LUserMatch.objects.filter(user_game_id=userId, game_match_id=matchInfo['gameId']).update(champion_id=matchInfo['champion'], que_type=matchInfo['queue'], season=matchInfo['season'], game_date=conv_game_time, game_role=matchInfo['role'], lane=matchInfo['lane'], upd_date=datetime.datetime.now())
         parsingMatchDetail(userId, accountId, matchInfo['gameId'], apiKey)     
 
 #매치 상세 정보 파싱
@@ -47,7 +35,6 @@ def parsingMatchDetail(userId, accountId, gameId, apiKey):
     ##매치 상세 정보 조회 API
     r = requests.get(commonUtil.apiUrl + "lol/match/v4/matches/"+ str(gameId) +"?api_key="+ apiKey)
     matchDtlJson = r.json()
-    print(matchDtlJson)
 
     if matchDtlJson['participantIdentities'] != None :
         matchUserList = matchDtlJson['participantIdentities']
@@ -73,15 +60,6 @@ def parsingMatchDetail(userId, accountId, gameId, apiKey):
             if matchUserSts['win']:
                 winFlag = "Y"
 
-            sql = " UPDATE L_USER_MATCH "
-            sql += " SET KILLS = %s "
-            sql += " , DEATHS = %s "
-            sql += " , ASSISTS = %s "
-            sql += " , WIN_FLAG = %s "
-            sql += " , UPD_DATE = NOW() "
-            sql += " WHERE USER_GAME_ID = %s "
-            sql += " AND GAME_MATCH_ID = %s "
-            commonUtil.curs.execute(sql, (matchUserSts['kills'], matchUserSts['deaths'], matchUserSts['assists'], winFlag, userId, gameId))
-            commonUtil.conn.commit() 
+            models.LUserMatch.objects.filter(user_game_id=userId, game_match_id=gameId).update(kills=matchUserSts['kills'], deaths=matchUserSts['deaths'], assists=matchUserSts['assists'], win_flag=winFlag, upd_date=datetime.datetime.now())
 
             print("적재성공")
