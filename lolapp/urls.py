@@ -10,4 +10,5 @@ urlpatterns = [
     path('enemylist', views.enemyList, name='enemylist'),
     path('enemylist/<str:userId>', views.enemyStsUpdList, name='enemyStsUpdList'),    
     path('updkey/<str:apiKey>', views.updKey, name='updKey'),
+    path('statlist', views.newFow, name='ponylist'),
 ]

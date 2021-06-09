@@ -78,3 +78,11 @@ def updKey(request, apiKey):
         'resultVal': "갱신되었습니다.",
     }
     return HttpResponse(template.render(context, request))
+
+def newFow(request):
+    template = loader.get_template('lolapp/statlist.html')
+    context = {
+        'dd': "Hello",
+    }
+    return HttpResponse(template.render(context, request))
+

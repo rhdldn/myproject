@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.typeleaf.org">
+<link href="/static/css/style_new.css" rel="stylesheet">
+<link href="/static/css/style.css" rel="stylesheet">
+
+<div class="container">
+    <section class="images" style="width: 100%;">
+        <div class="contents" style="height: 100%;">
+            <div class="searchBox inline">
+                <div class="contTitle"><img src="/static/img/icon_circle.png" alt="icon" class="mr10"><span>검색</span></div>
+                <div class="setSearchData mt15">
+                    <div class="keywordBox">
+                        <div class="setCntList" style="float: left; margin-top: 0; width: 100%;">
+                            <input id="input-image-searchnm" type="text" name="input-image-searchnm" placeholder="아이디" style="width: 100%;"><img id="searchImg" src="/static/img/icon_find.png" alt="icon" class="iconFind"></div>
+                        </div>
+
+                        <div class="setCntList" style="margin-top: 10%; width: 100%; height: 100%;">
+                            <div style="float: left; width: 50%; height: 30%;">
+                                <img id="searchImg2" src="/static/img/icon_find.png" alt="icon" class="iconFind" style="width: 100%; height: 100%;">
+                            </div>
+                            <div style="float: left; width: 50%; height: 20%;">
+                                <img id="searchImg3" src="/static/img/icon_find.png" alt="icon" class="iconFind" style="width: 100%; height: 100%;">
+                            </div>
+                            <div style="float: left; width: 50%; height: 10%;"></div>
+                        </div>
+                </div>
+            </div>
+
+            <div class="resultBox inline">
+                <div class="rsContType1">
+                    <div class="rsImage inline">
+                        <div class="contTitle">
+                            <div class="topLeftCont inline">
+                                <img src="/static/img/icon_circle.png" alt="icon" class="mr10">
+                                <span>검색결과</span><span class="division">|</span><span id="rsCount" class="rsCnt">0개</span>
+                            </div>
+                        </div>
+                        <div class="tblDataList tableList mt20">
+                            <table id="imageList">
+                                <colgroup>
+                                    <col width="">
+                                    <col width="">
+                                    <col width="">
+                                    <col width="">
+                                    <col width="">
+                                    <col width="">
+                                    <col width="">
+                                    <col width="">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>NO</th>
+                                    <th>사진</th>
+                                    <th>명칭</th>
+                                    <th>대표클래스</th>
+                                    <th>상태</th>
+                                    <th>생성일</th>
+                                    <th>생성자</th>
+                                </tr>
+                                </thead>
+                                <tbody id="content-list">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="pagination" class="paging mt20">
+                            </div>
+                            <div class="setCntList">
+                                <select id="cbo-image-limitcnt" name="cbo-image-limitcnt">
+                                    <option value="25">25개씩보기</option>
+                                    <option value="50">50개씩보기</option>
+                                    <option value="100">100개씩보기</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- //.paging -->
+                    </div>
+                    <div class="imageInfo inline">
+                        <div class="contTitle"><img src="/static/img/icon_circle.png" alt="icon" class="mr10"><span>상세정보</span></div>
+                        <div class="imgInfo mt20" style="height: 90%;">
+                            <div id="imgTab" class="imgTab">
+                                <span class="active" data-name="base" style="width: 100%;">상세정보</span>
+                            </div>
+                            <div id="imgDtl" class="imgTabCont" style="height: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- //.popupWrap -->
+                </div>
+                <!-- //.rsContents -->
+            </div>
+        </div>
+    </section>
+</div>
+<script src="/static/vendor/jquery/jquery.min.js"></script>
+<script type="text/javascript">
+
+    let _lstImgData;
+    let _lstImgDataList;
+
+    $(document).ready(function () {
+
+        $("#imageList tbody").on("click", "td", function (e) {
+
+            //그린 영역 초기화
+            $(".rect-area").remove();
+
+            if($(this).parents("tr").hasClass("active")){
+                $(this).prop('checked', false); $(this).parents("tr").removeClass("active");
+                //$(this).parents("tr").children("td").eq(0).children("span").children("input").prop('checked', '');
+            }else{
+                $("#imageList tbody tr").removeClass("active");
+                $(this).parents("tr").addClass("active");
+                //$(this).parents("tr").children("td").eq(0).children("span").children("input").prop('checked', 'checked');
+
+                let idx = $(this).parent("tr").index();
+                _lstImgData = _lstImgDataList[idx];
+                imageTemplate.imageDtl(_lstImgData.imageid, _lstImgData.imagesrc, _lstImgData.width, _lstImgData.height);
+                imageTemplate.imageObject(_lstImgData.imageid, _lstImgData.width, _lstImgData.height);
+            }
+        });
+
+        //게시물 개수 Change Event
+        $("#cbo-image-limitcnt").change(function() {
+            imageTemplate.imageList(1);
+        });
+
+        //텍스트 Key Down
+        $("#input-image-searchnm").keydown(function(key) {
+            if(key.keyCode == 13) {
+                key.preventDefault();
+
+                if($("#cbo-searchdiv").val() == "title"){
+
+                    //조회 조건 조회
+                    imageTemplate.imageList(1);
+                }
+            }
+        });
+    })
+
+
+</script>
+</body></html>
